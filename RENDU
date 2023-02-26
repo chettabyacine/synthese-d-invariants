@@ -1,0 +1,125 @@
+           Mini-projet 2 : Synthèse d'invariant en SMT-LIB
+                            fichier RENDU
+                     (à remplir obligatoirement)
+
+**Un mini-projet sans fichier RENDU rempli ne recevra pas de note.**
+
+Date limite: 19 décembre 2022
+
+Identité
+--------
+Nombre de binôme: 16
+Nom, prénom 1: OUIKENE Mohamed Salah Eddine
+Nom, prénom 2: CHETTAB Yacine
+
+
+Questions sur votre code
+------------------------
+
+** Exercice 2 **
+
+0. Avez-vous testé que `make invariants` s'exécute sans erreurs ou
+   warnings, puis que `./invariants` produit une sortie au format
+   SMT-LIB, et enfin que cette sortie est acceptée par Z3 ?
+
+ 
+**à remplir** 
+R.0 : Oui .
+
+---
+
+1. Le type `term` est un type récursif : quel type de fonction est-il
+   naturel d'utiliser ? Quels sont vos cas de base et quelle quantité
+   strictement décroissante au cours des appels successifs vous assure
+   la terminaison ?
+   
+
+**à remplir**
+R.1 : 
+     - Fonction récursive.
+     - Les cas de base : Const of int et Var of int
+     - La quantité : Add of term * term, et Mult of term * term
+---
+
+2. Pour l'implémentation de `str_condition`, quelles sont les
+   fonctions auxiliaires que vous avez utilisées et/ou écrites ? (Par
+   une fonction auxiliaire, on entend ici soit une fonction d'une
+   bibliothèque, par exemple des fonctions comme `List.length` ou
+   `List.rev_append`, ou une fonction `aux_str_condition` que vous
+   avez écrite vous-mêmes.) Expliquez en quelques phrases en français
+   comment ces fonctions auxiliaires sont utilisées dans votre
+   implémentation de la fonction `str_condition`.
+   
+**à remplir**
+R.2 :
+   On a utilisé une fonction auxiliaire :
+    -constructeur : fonction récursive qui prend une liste de termes t1, ..., tk et retourne une chaîne 
+     de caractères "t1, ..., tk)". Son résultat est concaténé avec “(Invar “. 
+---
+
+3. Pour l'implémentation de `str_assert_forall`, quelles sont les
+   fonctions auxiliaires que vous avez utilisées et/ou écrites ?
+   Expliquez en quelques phrases en français comment ces fonctions
+   auxiliaires sont utilisées dans votre implémentation de la fonction
+   `str_assert_forall`.
+   
+**à remplir**   
+R.3 : 
+    On a utiliser les fonctions auxiliaires suivantes :
+    -constructeur_of_vars : qui prend en argument un entier n et une chaîne de caractères s, 
+                            et retourne l'expression SMT LIB qui correspond à la formule 
+                            "(forall ((x1 Int) ... (xk Int)) (s))".
+   -str_assert : prend en argument une chaîne de caractère s et retourne la chaîne "(assert s )"
+   -str_forall : prend en argument deux chaînes de caractères vars et cond et
+                 retourne la chaîne "(forall (vars) (cond))".
+Le résultat du contructeur_of_vars est passé comme l’argument “vars” dans la fonction str_forall. La chaîne est finalement passée à la fonction str_assert.
+---
+
+4. Le langage de programmation WA suppose que les mises à jour des
+   variables `x1`, ..., `xk` sont simultanées : par exemple, si `x1`
+   vaut `1` et x2 vaut `1`, exécuter
+
+   x1 = x2 + 1;
+   x2 = x1 + 1;
+
+   résulte en `x1` valant `2` et `x2` valant `2`. En Java, les mises à
+   jour sont séquentielles et le résultat serait que `x1` vaudrait `2`
+   et `x2` vaudrait `3`. Expliquez en français comment modifier le
+   code pour construite un programme SMT-LIB plus proche de la façon
+   dont les variables sont mises à jour en Java.
+
+**à remplir**
+
+Réponse 4:
+   Pour s'assurer que les valeurs sont mises à jour séquentiellement comme Java, il faudra ajouter une autre condition dans le côté droit de l'implication dans  'loop_condition'. La condition rajoutée est un ensemble de blocs 'exists' imbriqués, une pour chaque variable. (un total de k) comme montré dans le code suivant:
+
+
+   (assert (forall ((x1 Int) (x2 Int))
+   (=>
+      (and (< x1 3) (Invar x1 x2))
+      (exists ((y1 Int)) 
+         (and
+            (= y1 (+ x1 1))
+            (exists ((y2 Int))
+            (and
+               (= y2 (+ x2 3))
+               (Invar y1 y2)
+ )))))))
+
+Dans ce cas, il facile de modifier la valeur de y1 et y2 de tel façon que y2 dépend de y1. exemple: 
+
+        (exists ((y2 Int))
+        (and
+          (= y2 (+ y1 3))
+          (Invar y1 y2)
+
+Pour le code de la fonction 'loop_condition', (dans la fonction auxiliaire  'loop_condition_implication'), l'appel de la fonction 'implication_droite' devrait être récursif car c'est elle qui construit les blocs de 'exists' récursivement. 
+
+
+---
+5. Avez-vous d'autres remarques sur votre rendu ? (question optionnelle)
+
+**à remplir**
+R.5 : Non
+
+
